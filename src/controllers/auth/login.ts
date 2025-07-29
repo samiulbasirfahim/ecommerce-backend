@@ -20,7 +20,14 @@ export async function Login(req: Request, res: Response) {
             },
         });
 
+
         if (!admin) return res.status(401).json({ message: "Invalid credentials" });
+
+        if (!admin?.verified) {
+            res.status(401).json({
+                message: "Unverified account"
+            })
+        }
 
         const valid = await comparePassword(password, admin.password);
         if (!valid) return res.status(401).json({ message: "Invalid credentials" });

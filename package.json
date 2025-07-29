@@ -17,12 +17,12 @@
     "@types/express": "^5.0.3",
     "@types/jsonwebtoken": "^9.0.10",
     "@types/node": "^24.1.0",
-    "@types/nodemailer": "^6.4.17",
     "bcrypt-ts": "^7.1.0",
     "cors": "^2.8.5",
     "dotconfig": "^0.0.1-security",
     "dotenv": "^17.2.1",
     "express": "^5.1.0",
+    "googleapis": "^154.1.0",
     "jsonwebtoken": "^9.0.2",
     "nodemailer": "^7.0.5",
     "nodemon": "^3.1.10",
@@ -30,5 +30,8 @@
     "ts-node": "^10.9.2",
     "tsx": "^4.20.3",
     "zod": "^4.0.10"
+  },
+  "devDependencies": {
+    "@types/nodemailer": "^6.4.17"
   }
 }

@@ -12,5 +12,6 @@ router.post("/init", Register);
 router.get("/check", CheckExists);
 router.post("/forget", ForgetPassword);
 router.post("/reset", resetPassword);
+// router.post("/verify", verifyEmail)
 
 export default router;

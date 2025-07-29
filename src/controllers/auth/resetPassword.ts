@@ -17,8 +17,8 @@ export async function resetPassword(req: Request, res: Response) {
         const admin = await prisma.admin.findFirst({
             where: {
                 email,
-                resetToken: token,
-                resetExpiresAt: { gt: new Date() },
+                secretToken: token,
+                tokenExpiresAt: { gt: new Date() },
             },
         });
         if (!admin)
@@ -29,8 +29,8 @@ export async function resetPassword(req: Request, res: Response) {
             where: { id: admin.id },
             data: {
                 password: hashed,
-                resetToken: null,
-                resetExpiresAt: null,
+                secretToken: null,
+                tokenExpiresAt: null,
             },
         });
 
