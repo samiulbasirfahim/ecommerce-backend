@@ -35,7 +35,7 @@ export async function ForgetPassword(req: Request, res: Response) {
             },
         });
 
-        const resetLink = `${process.env.FRONTEND_URL}/reset-password?token=${token}`;
+        const resetLink = `${process.env.FRONTEND_URL}/admin/reset?token=${token}&email=${admin.email}`;
 
         sendAdminPasswordResetMail(resetLink, admin.email);
 

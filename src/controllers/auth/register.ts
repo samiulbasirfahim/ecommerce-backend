@@ -5,9 +5,7 @@ import { hashPassword } from "../../lib/hash.js";
 import { signJwt } from "../../lib/jwt.js";
 import { getZodErrors } from "../../lib/utils.js";
 import { randomBytes } from "crypto";
-import {
-    sendAdminVerificationMail,
-} from "../../lib/emailService.js";
+import { sendAdminVerificationMail } from "../../lib/emailService.js";
 
 const registerSchema = z.object({
     email: z.string().email(),
@@ -45,7 +43,17 @@ export async function Register(req: Request, res: Response) {
         sendAdminVerificationMail(verifyLink, admin.email);
 
         const token = signJwt({ id: admin.id, email: admin.email });
-        res.json({ token });
+        return res
+            .cookie("token_admin", token, {
+                httpOnly: true,
+                secure: process.env.NODE_ENV === "production",
+                sameSite: "lax",
+                maxAge: 7 * 24 * 60 * 60 * 1000,
+            })
+            .status(200)
+            .json({
+                message: "Initialized",
+            });
     } catch (err) {
         if (err instanceof z.ZodError) {
             const errors = getZodErrors(err);

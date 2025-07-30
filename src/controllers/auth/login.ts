@@ -20,20 +20,29 @@ export async function Login(req: Request, res: Response) {
             },
         });
 
-
         if (!admin) return res.status(401).json({ message: "Invalid credentials" });
 
         if (!admin?.verified) {
             res.status(401).json({
-                message: "Unverified account"
-            })
+                message: "Unverified account",
+            });
         }
 
         const valid = await comparePassword(password, admin.password);
         if (!valid) return res.status(401).json({ message: "Invalid credentials" });
 
-        const token = signJwt({ id: admin.id, email: email });
-        res.json({ token });
+        const token = signJwt({ id: admin.id, email: admin.email });
+        return res
+            .cookie("token_admin", token, {
+                httpOnly: true,
+                secure: process.env.NODE_ENV === "production",
+                sameSite: "lax",
+                maxAge: 7 * 24 * 60 * 60 * 1000,
+            })
+            .status(200)
+            .json({
+                message: "Logged in",
+            });
     } catch (err) {
         if (err instanceof z.ZodError) {
             const errors = getZodErrors(err);

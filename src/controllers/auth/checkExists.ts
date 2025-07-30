@@ -1,27 +1,57 @@
 import type { Request, Response } from "express";
 import { prisma } from "../../lib/prisma.js";
-import { date } from "zod";
+import { verifyJwt } from "../../lib/jwt.js";
 
 export async function CheckExists(req: Request, res: Response) {
     try {
         const admin = await prisma.admin.findFirst();
+        const tokenCookie = req.cookies.token_admin;
 
-        let currentTime = new Date();
+        if (!admin) {
+            return res.json({
+                exists: false,
+                verified: false,
+                authenticated: false,
+            });
+        }
 
         if (
-            admin?.tokenExpiresAt &&
-            new Date(admin.tokenExpiresAt).getTime() < currentTime.getTime()
+            (!admin.verified && !admin.tokenExpiresAt) ||
+            (!admin.verified &&
+                admin.tokenExpiresAt &&
+                new Date(admin.tokenExpiresAt).getTime() < Date.now())
         ) {
-            await prisma.admin.delete({
-                where: {
-                    id: admin.id,
-                },
+            await prisma.admin.delete({ where: { id: admin.id } });
+            return res.json({
+                exists: false,
+                verified: false,
+                authenticated: false,
             });
-
-            res.json({ exists: false, verified: false });
         }
-        res.json({ exists: !!admin, verified: admin?.verified });
+
+        console.log("token", tokenCookie);
+
+        const jwtPayload = verifyJwt(tokenCookie);
+        if (typeof jwtPayload === "string" || !jwtPayload?.id) {
+            return res.json({
+                exists: true,
+                verified: admin.verified,
+                authenticated: false,
+            });
+        }
+
+        const matchedAdmin = await prisma.admin.findFirst({
+            where: { id: jwtPayload.id },
+        });
+
+        console.log("matched: ", matchedAdmin)
+
+        return res.json({
+            exists: true,
+            verified: admin.verified,
+            authenticated: !!matchedAdmin,
+        });
     } catch (err) {
-        res.status(500).json({ message: "Internal server error" });
+        return res.status(500).json({ message: "Internal server error" });
     }
 }
